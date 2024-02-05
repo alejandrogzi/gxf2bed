@@ -1,0 +1,30 @@
+[package]
+name = "gxt2bed"
+version = "0.1.0"
+authors = ["alejandrogzi <jose.gonzalesdezavala1@unmsm.edu.pe>"]
+edition = "2021"
+license = "MIT"
+description = "Fastest GTF/GFF-to-BED converter chilling around"
+homepage = "https://github.com/alejandrogzi/gXt2bed"
+repository = "https://github.com/alejandrogzi/gXt2bed"
+readme = "README.md"
+keywords = ["bed", "gtf", "cli", "convert"]
+categories = ["command-line-utilities", "science"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "1.0"
+rayon = "1.8.0"
+num_cpus = "1.16.0"
+clap = {version = "4.0", features = ["derive"]}
+libc = "0.2.151"
+
+[profile.release]
+lto = true
+
+[lib]
+name = "gxt2bed"
+path = "src/lib.rs"
+
+
