@@ -1,4 +1,4 @@
-use gxt2bed::*;
+use gxf2bed::*;
 
 use std::collections::HashMap;
 use std::path::PathBuf;

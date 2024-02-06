@@ -100,10 +100,10 @@ pub fn max_mem_usage_mb() -> f64 {
 pub fn msg() {
     println!(
         "{}\n{}\n{}\n",
-        "\n##### GXT2BED #####".bright_magenta().bold(),
+        "\n##### GXF2BED #####".bright_magenta().bold(),
         indoc!(
             "Fastest GTF/GFF-to-BED converter chilling around.
-        Repository: https://github.com/alejandrogzi/gx2bed
+        Repository: https://github.com/alejandrogzi/gxf2bed
         Feel free to contact the developer if any issue/bug is found."
         ),
         format!("Version: {}", VERSION)
