@@ -6,7 +6,12 @@ use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 
+use colored::Colorize;
+use indoc::indoc;
+
 use crate::gxf::GxfRecord;
+
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn reader<P: AsRef<Path> + Debug>(file: P) -> io::Result<String> {
     let mut file = File::open(file)?;
@@ -22,63 +27,12 @@ pub fn parallel_parse<'a>(s: &'a str) -> Result<Vec<GxfRecord>, &'static str> {
     return records;
 }
 
-pub fn constructor<'a>(s: &'a str) -> Result<HashMap<String, HashMap<&str, String>>, &'static str> {
-    s.par_lines()
-        .map(|line| {
-            if !line.starts_with("#") {
-                Some(GxfRecord::parse(line))
-            } else {
-                None
-            }
-        })
-        .filter_map(|x| x)
-        .try_fold_with(HashMap::new(), |mut acc, record| {
-            let record = record.unwrap();
-            let tx_id = record.attr.transcript_id().to_owned();
-            let entry = acc.entry(tx_id).or_insert(HashMap::new());
-
-            if !record.chr.is_empty() {
-                if record.feat == "transcript" {
-                    entry.insert("chr", record.chr.to_owned());
-                    entry.insert("start", record.start.to_string());
-                    entry.insert("end", record.end.to_string());
-                    entry.insert("strand", record.strand.to_string());
-                } else if record.feat == "exon" {
-                    entry.entry("exons").or_default().push('.');
-
-                    let exon_starts = entry.entry("exon_starts").or_insert(String::from(""));
-                    exon_starts.push_str(&record.start.to_string());
-                    exon_starts.push_str(",");
-
-                    let exon_sizes = entry.entry("exon_sizes").or_insert(String::from(""));
-                    exon_sizes.push_str(&(record.end - record.start).to_string());
-                    exon_sizes.push_str(",");
-                } else if record.feat == "start_codon" {
-                    entry.insert("start_codon", record.start.to_string());
-                } else if record.feat == "stop_codon" {
-                    entry.insert("stop_codon", record.start.to_string());
-                }
-            }
-
-            Ok(acc)
-        }) // end fold
-        .try_reduce_with(|mut map1, map2| {
-            for (k, v) in map2 {
-                let entry = map1.entry(k).or_insert(HashMap::new());
-                for (k2, v2) in v {
-                    entry.insert(k2, v2);
-                }
-            }
-            Ok(map1)
-        }) // end reduce
-        .unwrap_or(Err("Error"))
-}
-
 pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMap<&str, String>)>) {
     let f = match File::create(&filename) {
         Err(err) => panic!("couldn't create file {:?}: {}", filename, err),
         Ok(f) => f,
     };
+    log::info!("Writing to {:?}", filename);
     let mut writer = BufWriter::new(f);
 
     for x in liner.iter() {
@@ -124,6 +78,9 @@ pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMa
         );
         writeln!(writer, "{}", line).unwrap();
     }
+
+    writer.flush().unwrap();
+    log::info!("Done writing!");
 }
 
 pub fn max_mem_usage_mb() -> f64 {
@@ -138,4 +95,17 @@ pub fn max_mem_usage_mb() -> f64 {
     } else {
         maxrss / 1024.0
     }
+}
+
+pub fn msg() {
+    println!(
+        "{}\n{}\n{}\n",
+        "\n##### GXT2BED #####".bright_magenta().bold(),
+        indoc!(
+            "Fastest GTF/GFF-to-BED converter chilling around.
+        Repository: https://github.com/alejandrogzi/gx2bed
+        Feel free to contact the developer if any issue/bug is found."
+        ),
+        format!("Version: {}", VERSION)
+    );
 }
