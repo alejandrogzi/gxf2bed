@@ -6,7 +6,7 @@ use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 
-use crate::gtf::GtfRecord;
+use crate::gxf::GxfRecord;
 
 pub fn reader<P: AsRef<Path> + Debug>(file: P) -> io::Result<String> {
     let mut file = File::open(file)?;
@@ -15,9 +15,9 @@ pub fn reader<P: AsRef<Path> + Debug>(file: P) -> io::Result<String> {
     Ok(contents)
 }
 
-pub fn parallel_parse<'a>(s: &'a str) -> Result<Vec<GtfRecord>, &'static str> {
-    let records: Result<Vec<GtfRecord>, &'static str> =
-        s.par_lines().map(|line| GtfRecord::parse(line)).collect();
+pub fn parallel_parse<'a>(s: &'a str) -> Result<Vec<GxfRecord>, &'static str> {
+    let records: Result<Vec<GxfRecord>, &'static str> =
+        s.par_lines().map(|line| GxfRecord::parse(line)).collect();
 
     return records;
 }
@@ -26,7 +26,7 @@ pub fn constructor<'a>(s: &'a str) -> Result<HashMap<String, HashMap<&str, Strin
     s.par_lines()
         .map(|line| {
             if !line.starts_with("#") {
-                Some(GtfRecord::parse(line))
+                Some(GxfRecord::parse(line))
             } else {
                 None
             }
