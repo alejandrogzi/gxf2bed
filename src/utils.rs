@@ -1,4 +1,4 @@
-use rayon::prelude::*;
+// use rayon::prelude::*;
 
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -9,7 +9,7 @@ use std::path::Path;
 use colored::Colorize;
 use indoc::indoc;
 
-use crate::gxf::GxfRecord;
+// use crate::gxf::GxfRecord;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -20,12 +20,12 @@ pub fn reader<P: AsRef<Path> + Debug>(file: P) -> io::Result<String> {
     Ok(contents)
 }
 
-pub fn parallel_parse<'a>(s: &'a str) -> Result<Vec<GxfRecord>, &'static str> {
-    let records: Result<Vec<GxfRecord>, &'static str> =
-        s.par_lines().map(|line| GxfRecord::parse(line)).collect();
-
-    return records;
-}
+// pub fn parallel_parse<'a>(s: &'a str) -> Result<Vec<GxfRecord>, &'static str> {
+//     let records: Result<Vec<GxfRecord>, &'static str> =
+//         s.par_lines().map(|line| GxfRecord::parse(line)).collect();
+//
+//     return records;
+// }
 
 pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMap<&str, String>)>) {
     let f = match File::create(&filename) {
