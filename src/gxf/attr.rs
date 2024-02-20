@@ -5,12 +5,12 @@ use thiserror::Error;
 
 #[derive(Debug)]
 pub struct Attribute {
-    gene_id: String,
-    transcript_id: String,
+    // gene_id: String,
+    feature: String,
 }
 
 impl Attribute {
-    pub fn parse(line: &String) -> Result<Self, ParseError> {
+    pub fn parse(line: &String, feature: &String) -> Result<Self, ParseError> {
         let mut attributes: HashMap<String, String> = HashMap::new();
         let bytes = line.as_bytes().iter().enumerate();
 
@@ -27,23 +27,22 @@ impl Attribute {
             }
         }
 
-        let gene_id = attributes.get("gene_id").ok_or(ParseError::Invalid);
-
+        // let gene_id = attributes.get("gene_id").ok_or(ParseError::Invalid);
         Ok(Attribute {
-            gene_id: gene_id?.to_string(),
-            transcript_id: attributes
-                .get("transcript_id")
-                .unwrap_or(&"0".to_string())
+            // gene_id: gene_id?.to_string(),
+            feature: attributes
+                .get(feature)
+                .unwrap_or(&"".to_string())
                 .to_string(),
         })
     }
+    //
+    // pub fn gene_id(&self) -> &str {
+    //     &self.gene_id
+    // }
 
-    pub fn gene_id(&self) -> &str {
-        &self.gene_id
-    }
-
-    pub fn transcript_id(&self) -> &str {
-        &self.transcript_id
+    pub fn feature(&self) -> &str {
+        &self.feature
     }
 }
 

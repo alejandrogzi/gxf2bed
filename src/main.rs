@@ -54,6 +54,36 @@ struct Args {
         default_value_t = num_cpus::get()
     )]
     threads: usize,
+
+    /// Parent feature; default is "transcript_id".
+    #[clap(
+        short = 'p',
+        long = "parent",
+        help = "Parent feature",
+        value_name = "PARENT",
+        default_value = "transcript"
+    )]
+    parent: String,
+
+    /// Child feature; default is "exon".
+    #[clap(
+        short = 'c',
+        long = "child",
+        help = "Child feature",
+        value_name = "CHILD",
+        default_value = "exon"
+    )]
+    child: String,
+
+    /// Feature to extract; default is "transcript_id".
+    #[clap(
+        short = 'f',
+        long = "feature",
+        help = "Feature to extract",
+        value_name = "FEATURE",
+        default_value = "transcript_id"
+    )]
+    feature: String,
 }
 
 impl Args {
@@ -144,6 +174,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         log::error!("{}", e);
         std::process::exit(1);
     });
+    log::info!("{:?}", args);
 
     rayon::ThreadPoolBuilder::new()
         .num_threads(args.threads)
@@ -156,7 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start_mem = max_mem_usage_mb();
 
     let contents = reader(&args.gxf)?;
-    let data = to_bed(&contents)?;
+    let data = to_bed(&contents, args.parent, args.child, args.feature)?;
     log::info!("{} records parsed", data.len());
 
     let mut liner = data
@@ -183,42 +214,54 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn to_bed<'a>(s: &'a str) -> Result<HashMap<String, HashMap<&str, String>>, &'static str> {
+pub fn to_bed<'a>(
+    s: &'a str,
+    parent: String,
+    child: String,
+    feature: String,
+) -> Result<HashMap<String, HashMap<&str, String>>, &'static str> {
     s.par_lines()
         .map(|line| {
             if !line.starts_with("#") {
-                Some(GxfRecord::parse(line))
+                Some(GxfRecord::parse(line, &feature))
             } else {
                 None
             }
         })
         .filter_map(|x| x)
         .try_fold_with(HashMap::new(), |mut acc, record| {
-            let record = record.unwrap();
-            let tx_id = record.attr.transcript_id().to_owned();
+            let record = record?;
+
+            let tx_id = if !record.attr.feature().is_empty() {
+                record.attr.feature().to_owned()
+            } else {
+                // continue with the next record
+                return Ok(acc);
+            };
+
             let entry = acc.entry(tx_id).or_insert(HashMap::new());
 
-            if !record.chr.is_empty() {
-                if record.feat == "transcript" {
-                    entry.insert("chr", record.chr.to_owned());
-                    entry.insert("start", record.start.to_string());
-                    entry.insert("end", record.end.to_string());
-                    entry.insert("strand", record.strand.to_string());
-                } else if record.feat == "exon" {
-                    entry.entry("exons").or_default().push('.');
+            if record.feat == parent {
+                // args.parent
+                entry.insert("chr", record.chr.to_owned());
+                entry.insert("start", record.start.to_string());
+                entry.insert("end", record.end.to_string());
+                entry.insert("strand", record.strand.to_string());
+            } else if record.feat == child {
+                // args.child
+                entry.entry("exons").or_default().push('.');
 
-                    let exon_starts = entry.entry("exon_starts").or_insert(String::from(""));
-                    exon_starts.push_str(&record.start.to_string());
-                    exon_starts.push_str(",");
+                let exon_starts = entry.entry("exon_starts").or_insert(String::from(""));
+                exon_starts.push_str(&record.start.to_string());
+                exon_starts.push_str(",");
 
-                    let exon_sizes = entry.entry("exon_sizes").or_insert(String::from(""));
-                    exon_sizes.push_str(&(record.end - record.start).to_string());
-                    exon_sizes.push_str(",");
-                } else if record.feat == "start_codon" {
-                    entry.insert("start_codon", record.start.to_string());
-                } else if record.feat == "stop_codon" {
-                    entry.insert("stop_codon", record.start.to_string());
-                }
+                let exon_sizes = entry.entry("exon_sizes").or_insert(String::from(""));
+                exon_sizes.push_str(&(record.end - record.start).to_string());
+                exon_sizes.push_str(",");
+            } else if record.feat == "start_codon" {
+                entry.insert("start_codon", record.start.to_string());
+            } else if record.feat == "stop_codon" {
+                entry.insert("stop_codon", record.start.to_string());
             }
 
             Ok(acc)

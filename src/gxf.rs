@@ -13,7 +13,7 @@ pub struct GxfRecord {
 }
 
 impl GxfRecord {
-    pub fn parse(line: &str) -> Result<Self, &'static str> {
+    pub fn parse(line: &str, feature: &String) -> Result<Self, &'static str> {
         if line.is_empty() {
             return Err("Empty line");
         }
@@ -24,8 +24,8 @@ impl GxfRecord {
             return Err("Line has fewer fields than expected".into());
         }
 
-        let attr =
-            Attribute::parse(&fields[8].to_string()).map_err(|_| "Error parsing attribute")?;
+        let attr = Attribute::parse(&fields[8].to_string(), feature)
+            .map_err(|_| "Error parsing attribute")?;
 
         Ok(Self {
             chr: String::from(fields[0]),
