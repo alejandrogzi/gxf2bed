@@ -63,7 +63,7 @@ to build gxf2bed from this repo, do:
 
 1. get rust (as described above)
 2. run `git clone https://github.com/alejandrogzi/gxf2bed.git && cd gxf2bed`
-3. run `cargo run --release -- -i <GTF/GFF> -o <BED> 
+3. run `cargo run --release -- -i <GTF/GFF> -o <BED>`
 
 ## Container image
 to build the development container image:
