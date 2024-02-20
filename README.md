@@ -26,14 +26,24 @@ Converts
 - *Canis lupus familiaris* ROS_Cfam_1.0 Ensembl 110 (55,335 transcripts) in 0.99 seconds. 
 - *Gallus galus* bGalGal1 Ensembl 110 (72,689 transcripts) in 1.14 seconds.
 
+> What's new on v.0.2
+>
+> - Now gxf2bed provides 3 new optional arguments: `parent, child, feature`
+> - The `parent` argument can be used to specify the main node from which the new .bed file will be build. This could be interpreted as 'which feature (3rd column) I want my .bed file to be build from'
+> - The `child` argument can be used to specify the child node from the bed file. This can be interpreted as 'which lines will compose my parent node information'
+> - The `feature` argument can be used to specify what does `gxf2bed` will use as the names on the .bed file. Could be 'gene_id', 'transcript_id' or anthing you want. You just need to be sure that this `feature` is present in all `parent` and `child` lines.
+> - These new additions do not compromise the initial functionality.
 
 ## Usage
 ``` rust
-Usage: gxf2bed[EXE] --input/-i <GTF/GFF> --output/-o <BED>
+Usage: gxf2bed[EXE] --input/-i <GTF/GFF> --output/-o <BED> [--parent/-p <PARENT>] [--child/-c <CHILD>] [--feature/-f <FEATURE>]
  
 Arguments:
     --input/-i <GTF/GFF>: a .gtf/.gff file
     --output/-o <BED>: path to output .bed file
+    --parent/-p <PARENT>: parent node [default: "transcript"]
+    --child/-c <CHILD>: child node [default: "exon"]
+    --feature/-f <FEATURE>: feature to extract from the attribute line [default: "transcript_id"]
 
 Options:
     --help: print help
