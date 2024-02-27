@@ -35,7 +35,7 @@ Converts
 >
 > - Fixes some rare GTF bugs due to extra '\n' at the end (malformed GTFs)
 > - Adds test modules for record parsing and attr parsing
-> - Build a nextflow module! Thanks to @edmundmiller!
+> - Build a nextflow module! Thanks to [@edmundmiller](https://github.com/edmundmiller)!
 > - Updates run times. Now `gxf2bed` is faster (~0.7s +/-0.2s) due to a change in the hashing algo (now using hashbrown)!
 
 
