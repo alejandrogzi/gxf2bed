@@ -1,3 +1,8 @@
+![Crates.io](https://img.shields.io/crates/v/gxf2bed?color=green)
+![GitHub](https://img.shields.io/github/license/alejandrogzi/gxf2bed?color=blue)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/gxf2bed)
+![Conda Platform](https://img.shields.io/conda/pn/bioconda/gxf2bed)
+
 # gxf2bed
 The fastest G{F,T}F-to-BED converter around the block! 
 
@@ -21,18 +26,18 @@ before your eyes blink!
 
 
 Converts
-- *Homo sapiens* GRCh38 GENCODE 44 (252,835 transcripts) in 3.34 seconds.
-- *Mus musculus* GRCm39 GENCODE 44 (149,547 transcritps) in 2.11 seconds.
-- *Canis lupus familiaris* ROS_Cfam_1.0 Ensembl 110 (55,335 transcripts) in 0.99 seconds. 
-- *Gallus galus* bGalGal1 Ensembl 110 (72,689 transcripts) in 1.14 seconds.
+- *Homo sapiens* GRCh38 GENCODE 44 (252,835 transcripts) in 2.99 seconds.
+- *Mus musculus* GRCm39 GENCODE 44 (149,547 transcritps) in 1.91 seconds.
+- *Canis lupus familiaris* ROS_Cfam_1.0 Ensembl 110 (55,335 transcripts) in 0.95 seconds. 
+- *Gallus galus* bGalGal1 Ensembl 110 (72,689 transcripts) in 1.07 seconds.
 
-> What's new on v.0.2
+> What's new on v.0.2.1
 >
-> - Now gxf2bed provides 3 new optional arguments: `parent, child, feature`
-> - The `parent` argument can be used to specify the main node from which the new .bed file will be build. This could be interpreted as 'which feature (3rd column) I want my .bed file to be build from'
-> - The `child` argument can be used to specify the child node from the bed file. This can be interpreted as 'which lines will compose my parent node information'
-> - The `feature` argument can be used to specify what does `gxf2bed` will use as the names on the .bed file. Could be 'gene_id', 'transcript_id' or anthing you want. You just need to be sure that this `feature` is present in all `parent` and `child` lines.
-> - These new additions do not compromise the initial functionality.
+> - Fixes some rare GTF bugs due to extra '\n' at the end (malformed GTFs)
+> - Adds test modules for record parsing and attr parsing
+> - Build a nextflow module! Thanks to @edmundmiller!
+> - Updates run times. Now `gxf2bed` is faster (~0.7s +/-0.2s) due to a change in the hashing algo (now using hashbrown)!
+
 
 ## Usage
 ``` rust
