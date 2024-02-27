@@ -1,6 +1,6 @@
 [package]
 name = "gxf2bed"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["alejandrogzi <jose.gonzalesdezavala1@unmsm.edu.pe>"]
 edition = "2021"
 license = "MIT"
@@ -21,7 +21,7 @@ log = "0.4.14"
 simple_logger = "4.0.0"
 indoc = "2.0"
 colored = "2.0.0"
-
+hashbrown = {version=">0.12", features=["rayon"]}
 
 [profile.release]
 lto = true
