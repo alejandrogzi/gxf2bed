@@ -1,15 +1,12 @@
-// use rayon::prelude::*;
-
-use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 
+use hashbrown::HashMap;
+
 use colored::Colorize;
 use indoc::indoc;
-
-// use crate::gxf::GxfRecord;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 

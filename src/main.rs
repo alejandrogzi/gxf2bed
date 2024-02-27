@@ -1,15 +1,11 @@
 use gxf2bed::*;
 
-use std::collections::HashMap;
-use std::path::PathBuf;
-
 use clap::Parser;
-
+use hashbrown::HashMap;
 use log::Level;
-
-use thiserror::Error;
-
 use rayon::prelude::*;
+use std::path::PathBuf;
+use thiserror::Error;
 
 #[derive(Parser, Debug)]
 #[clap(
