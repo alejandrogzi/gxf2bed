@@ -31,12 +31,10 @@ Converts
 - *Canis lupus familiaris* ROS_Cfam_1.0 Ensembl 110 (55,335 transcripts) in 0.95 seconds. 
 - *Gallus galus* bGalGal1 Ensembl 110 (72,689 transcripts) in 1.07 seconds.
 
-> What's new on v.0.2.1
+> What's new on v.0.2.2
 >
-> - Fixes some rare GTF bugs due to extra '\n' at the end (malformed GTFs)
-> - Adds test modules for record parsing and attr parsing
-> - Build a nextflow module! Thanks to [@edmundmiller](https://github.com/edmundmiller)!
-> - Updates run times. Now `gxf2bed` is faster (~0.7s +/-0.2s) due to a change in the hashing algo (now using hashbrown)!
+> - Allows translation without relationships to be compatible with Prokka outputs
+> - To perform plain translation without hierarchy just explicitly declare `--parent "" --child ""`
 
 
 ## Usage
