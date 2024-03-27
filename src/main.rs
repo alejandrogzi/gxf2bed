@@ -10,7 +10,7 @@ use thiserror::Error;
 #[derive(Parser, Debug)]
 #[clap(
     name = "gxf2bed",
-    version = "0.1.0",
+    version = "0.2.2",
     author = "Alejandro Gonzales-Irribarren <jose.gonzalesdezavala1@unmsm.edu.pe>",
     about = "Fastest GTF/GFF-to-BED converter chilling around"
 )]
@@ -237,27 +237,14 @@ pub fn to_bed<'a>(
 
             let entry = acc.entry(tx_id).or_insert(HashMap::new());
 
-            if record.feat == parent {
-                // args.parent
+            if !parent.is_empty() {
+                send_ft(&record.feat, entry, &record, &parent, &child);
+            } else {
                 entry.insert("chr", record.chr.to_owned());
                 entry.insert("start", record.start.to_string());
                 entry.insert("end", record.end.to_string());
                 entry.insert("strand", record.strand.to_string());
-            } else if record.feat == child {
-                // args.child
-                entry.entry("exons").or_default().push('.');
-
-                let exon_starts = entry.entry("exon_starts").or_insert(String::from(""));
-                exon_starts.push_str(&record.start.to_string());
-                exon_starts.push_str(",");
-
-                let exon_sizes = entry.entry("exon_sizes").or_insert(String::from(""));
-                exon_sizes.push_str(&(record.end - record.start).to_string());
-                exon_sizes.push_str(",");
-            } else if record.feat == "start_codon" {
-                entry.insert("start_codon", record.start.to_string());
-            } else if record.feat == "stop_codon" {
-                entry.insert("stop_codon", record.start.to_string());
+                to_exon(entry, &record);
             }
 
             Ok(acc)
@@ -272,4 +259,43 @@ pub fn to_bed<'a>(
             Ok(map1)
         }) // end reduce
         .unwrap_or(Err("Error converting GTF/GFF3 to BED"))
+}
+
+fn send_ft(
+    feat: &str,
+    entry: &mut HashMap<&str, String>,
+    record: &GxfRecord,
+    parent: &str,
+    child: &str,
+) {
+    if feat == parent {
+        entry.insert("chr", record.chr.to_owned());
+        entry.insert("start", record.start.to_string());
+        entry.insert("end", record.end.to_string());
+        entry.insert("strand", record.strand.to_string());
+    } else if feat == child {
+        to_exon(entry, record);
+    } else {
+        match feat {
+            "start_codon" => {
+                entry.insert("start_codon", record.start.to_string());
+            }
+            "stop_codon" => {
+                entry.insert("stop_codon", record.start.to_string());
+            }
+            _ => {}
+        }
+    }
+}
+
+fn to_exon(entry: &mut HashMap<&str, String>, record: &GxfRecord) {
+    entry.entry("exons").or_default().push('.');
+
+    let exon_starts = entry.entry("exon_starts").or_insert(String::from(""));
+    exon_starts.push_str(&record.start.to_string());
+    exon_starts.push_str(",");
+
+    let exon_sizes = entry.entry("exon_sizes").or_insert(String::from(""));
+    exon_sizes.push_str(&(record.end - record.start).to_string());
+    exon_sizes.push_str(",");
 }
