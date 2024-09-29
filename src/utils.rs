@@ -1,28 +1,34 @@
+use std::error::Error;
 use std::fmt::Debug;
 use std::fs::File;
-use std::io::{self, BufWriter, Read, Write};
+use std::io::{BufWriter, Read, Write};
 use std::path::Path;
 
 use hashbrown::HashMap;
+
+use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 
 use colored::Colorize;
 use indoc::indoc;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub fn reader<P: AsRef<Path> + Debug>(file: P) -> io::Result<String> {
-    let mut file = File::open(file)?;
+pub fn raw<P: AsRef<Path> + Debug>(f: P) -> Result<String, Box<dyn Error>> {
+    let mut file = File::open(f)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
+
     Ok(contents)
 }
 
-// pub fn parallel_parse<'a>(s: &'a str) -> Result<Vec<GxfRecord>, &'static str> {
-//     let records: Result<Vec<GxfRecord>, &'static str> =
-//         s.par_lines().map(|line| GxfRecord::parse(line)).collect();
-//
-//     return records;
-// }
+pub fn with_gz<P: AsRef<Path> + Debug>(f: P) -> Result<String, Box<dyn Error>> {
+    let file = File::open(f)?;
+    let mut decoder = GzDecoder::new(file);
+    let mut contents = String::new();
+
+    decoder.read_to_string(&mut contents)?;
+    Ok(contents)
+}
 
 pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMap<&str, String>)>) {
     let f = match File::create(&filename) {
@@ -30,7 +36,13 @@ pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMa
         Ok(f) => f,
     };
     log::info!("Writing to {:?}", filename);
-    let mut writer = BufWriter::new(f);
+
+    let mut writer: Box<dyn Write> = match filename.as_ref().extension() {
+        Some(ext) if ext == "gz" => {
+            Box::new(BufWriter::new(GzEncoder::new(f, Compression::default())))
+        }
+        _ => Box::new(BufWriter::new(f)),
+    };
 
     for x in liner.iter() {
         let start = x.1.get("start").unwrap().parse::<u32>().unwrap();
