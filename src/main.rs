@@ -4,14 +4,14 @@ use clap::Parser;
 use hashbrown::HashMap;
 use log::Level;
 use rayon::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use thiserror::Error;
 
 #[derive(Parser, Debug)]
 #[clap(
     name = "gxf2bed",
-    version = "0.2.2",
-    author = "Alejandro Gonzales-Irribarren <jose.gonzalesdezavala1@unmsm.edu.pe>",
+    version = env!("CARGO_PKG_VERSION"),
+    author = "Alejandro Gonzales-Irribarren <alejandrxgzi@gmail.com>",
     about = "Fastest GTF/GFF-to-BED converter chilling around"
 )]
 struct Args {
@@ -93,16 +93,7 @@ impl Args {
     fn check_input(&self) -> Result<(), ArgError> {
         if !self.gxf.exists() {
             let err = format!("file {:?} does not exist", self.gxf);
-            return Err(ArgError::InvalidInput(err));
-        } else if !self.gxf.extension().unwrap().eq("gff")
-            & !self.gxf.extension().unwrap().eq("gtf")
-            & !self.gxf.extension().unwrap().eq("gff3")
-        {
-            let err = format!(
-                "file {:?} is not a GTF or GFF3 file, please specify the correct format",
-                self.gxf
-            );
-            return Err(ArgError::InvalidInput(err));
+            Err(ArgError::InvalidInput(err))
         } else if std::fs::metadata(&self.gxf).unwrap().len() == 0 {
             let err = format!("file {:?} is empty", self.gxf);
             return Err(ArgError::InvalidInput(err));
@@ -113,9 +104,10 @@ impl Args {
 
     /// Checks the output file for validity. If the file is not a BED file, an error is returned.
     fn check_output(&self) -> Result<(), ArgError> {
-        if !self.output.extension().unwrap().eq("bed") {
+        if !self.output.extension().unwrap().eq("bed") & !self.output.extension().unwrap().eq("gz")
+        {
             let err = format!("file {:?} is not a BED file", self.output);
-            return Err(ArgError::InvalidOutput(err));
+            Err(ArgError::InvalidOutput(err))
         } else {
             Ok(())
         }
@@ -125,12 +117,11 @@ impl Args {
     /// and less than or equal to the number of logical CPUs.
     fn check_threads(&self) -> Result<(), ArgError> {
         if self.threads == 0 {
-            let err = format!("number of threads must be greater than 0");
-            return Err(ArgError::InvalidThreads(err));
+            let err = "number of threads must be greater than 0".to_string();
+            Err(ArgError::InvalidThreads(err))
         } else if self.threads > num_cpus::get() {
-            let err = format!(
-                "number of threads must be less than or equal to the number of logical CPUs"
-            );
+            let err = "number of threads must be less than or equal to the number of logical CPUs"
+                .to_string();
             return Err(ArgError::InvalidThreads(err));
         } else {
             Ok(())
@@ -181,9 +172,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let st = std::time::Instant::now();
     let start_mem = max_mem_usage_mb();
+    let mut sep = b' ';
 
-    let contents = reader(&args.gxf)?;
-    let data = to_bed(&contents, args.parent, args.child, args.feature)?;
+    let contents = match args.gxf.extension().and_then(|s| s.to_str()) {
+        Some("gz") => {
+            match Path::new(args.gxf.file_stem().unwrap())
+                .extension()
+                .expect("ERROR: No extension found")
+                .to_str()
+            {
+                Some("gff") | Some("gff3") => {
+                    sep = b';';
+                }
+                _ => (),
+            };
+            with_gz(&args.gxf)?
+        }
+        Some("gtf") => raw(&args.gxf)?,
+        Some("gff") | Some("gff3") => {
+            sep = b'=';
+            raw(&args.gxf)?
+        }
+        _ => panic!("ERROR: Not a GTF/GFF. Wrong file format!"),
+    };
+
+    let data = to_bed(&contents, args.parent, args.child, args.feature, sep)?;
+
     log::info!("{} records parsed", data.len());
 
     let mut liner = data
@@ -211,15 +225,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 pub fn to_bed<'a>(
-    s: &'a str,
+    s: &str,
     parent: String,
     child: String,
     feature: String,
-) -> Result<HashMap<String, HashMap<&str, String>>, &'static str> {
+    sep: u8,
+) -> Result<HashMap<String, HashMap<&'a str, String>>, &'static str> {
     s.par_lines()
         .map(|line| {
             if !line.starts_with("#") {
-                Some(GxfRecord::parse(line, &feature))
+                match sep {
+                    b' ' => Some(GxfRecord::parse::<b' '>(line, &feature)),
+                    b'=' => Some(GxfRecord::parse::<b'='>(line, &feature)),
+                    _ => None,
+                }
             } else {
                 None
             }
@@ -293,9 +312,9 @@ fn to_exon(entry: &mut HashMap<&str, String>, record: &GxfRecord) {
 
     let exon_starts = entry.entry("exon_starts").or_insert(String::from(""));
     exon_starts.push_str(&record.start.to_string());
-    exon_starts.push_str(",");
+    exon_starts.push(',');
 
     let exon_sizes = entry.entry("exon_sizes").or_insert(String::from(""));
     exon_sizes.push_str(&(record.end - record.start).to_string());
-    exon_sizes.push_str(",");
+    exon_sizes.push(',');
 }
