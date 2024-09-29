@@ -12,10 +12,10 @@ use thiserror::Error;
     name = "gxf2bed",
     version = env!("CARGO_PKG_VERSION"),
     author = "Alejandro Gonzales-Irribarren <alejandrxgzi@gmail.com>",
-    about = "Fastest GTF/GFF-to-BED converter chilling around"
+    about = "fastest GTF/GFF-to-BED converter chilling around"
 )]
 struct Args {
-    /// The fastest G{T,F}F-to-BED converter chilling around the world!
+    /// fastest G{T,F}F-to-BED converter chilling around the world!
     ///
     /// This program converts GTF/GFF3 files to BED format blazingly fast.
     /// Start by providing the path to the GTF/GFF3 file with -i/--input file.gtf
