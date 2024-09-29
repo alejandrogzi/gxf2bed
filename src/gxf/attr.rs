@@ -1,72 +1,86 @@
-// use std::collections::HashMap;
-use hashbrown::HashMap;
+// use hashbrown::HashMap;
 use std::fmt::Debug;
-
 use thiserror::Error;
 
-#[derive(Debug, PartialEq)]
-pub struct Attribute {
-    feature: String,
-}
-
-impl Attribute {
-    pub fn parse(line: &String, feature: &String) -> Result<Self, ParseError> {
-        let mut attributes: HashMap<String, String> = HashMap::new();
-        let bytes = line.trim_end().as_bytes().iter().enumerate();
-
-        let mut start = 0;
-
-        for (mut i, byte) in bytes {
-            if *byte == b';' || i == line.len() - 1 {
-                if i == line.len() - 1 && *byte != b';' {
-                    i += 1;
-                };
-                let word = &line[start..i];
-                if !word.is_empty() {
-                    let (key, value) = get_pair(word).ok_or(ParseError::Invalid)?;
-                    attributes.insert(key, value);
+macro_rules! extract_field {
+    ($bytes:ident split by $sep:ident to $( $field_name:expr => $output_field:expr; )+) => {
+        $(
+            if let Some(without_key) = $bytes.strip_prefix($field_name) {
+                if let Some(without_eq) = without_key.strip_prefix(&[$sep]) {
+                    let value = unsafe { std::str::from_utf8_unchecked(without_eq) };
+                    *$output_field = Some(value.trim_matches(|c| c == '"'));
                 }
-                start = i + 1;
             }
+        )+
+    };
+    ($bytes:ident split by $sep:literal to $( $field_name:literal => $output_field:expr; )+) => {
+        $(
+            if let Some(without_key) = $bytes.strip_prefix($field_name) {
+                if let Some(without_eq) = without_key.strip_prefix(&[$sep]) {
+                    let value = unsafe { std::str::from_utf8_unchecked(without_eq) };
+                    *$output_field = Some(value.trim_matches(|c| c == '"'));
+                }
+            }
+        )+
+    };
+}
+
+#[inline(always)]
+fn split_and_trim_bytes<const BY: u8, const TRIM: u8>(bytes: &[u8]) -> impl Iterator<Item = &[u8]> {
+    bytes.split(|b| *b == BY).map(|b| {
+        let mut idx = 0;
+        while idx < b.len() && b[idx] == TRIM {
+            idx += 1;
         }
+        &b[idx..]
+    })
+}
 
-        Ok(Attribute {
-            feature: attributes
-                .get(feature)
-                .unwrap_or(&"".to_string())
-                .to_string(),
-        })
+#[derive(Debug, PartialEq)]
+pub struct Attribute<'a> {
+    feature: &'a str,
+}
+
+impl<'a> Attribute<'a> {
+    pub fn parse<const SEP: u8>(
+        line: &'a str,
+        feature: &String,
+    ) -> Result<Attribute<'a>, ParseError> {
+        if !line.is_empty() {
+            let field_bytes = split_and_trim_bytes::<b';', b' '>(line.trim_end().as_bytes());
+
+            let mut feat = None;
+
+            for field in field_bytes {
+                extract_field!(
+                    field split by SEP to
+                    feature.as_bytes() => &mut (feat);
+                )
+            }
+
+            Ok(Attribute {
+                feature: feat.unwrap_or(""),
+            })
+        } else {
+            Err(ParseError::Empty)
+        }
     }
 
-    pub fn feature(&self) -> &str {
-        &self.feature
+    #[inline(always)]
+    pub fn feature(&self) -> &'a str {
+        self.feature
     }
 }
 
-fn get_pair(line: &str) -> Option<(String, String)> {
-    let line = line.trim();
-    let mut bytes = line.as_bytes().iter();
-    let i = bytes
-        .position(|b| *b == b' ' || *b == b'=')
-        .ok_or(ParseError::Invalid)
-        .map_err(|e| {
-            eprintln!("{:?}", e);
-            e
-        })
-        .unwrap();
-
-    let key = &line[..i];
-    let value = &line[i + 1..line.len()].trim_matches('"').trim();
-
-    Some((key.to_string(), value.to_string()))
-}
-
-#[derive(Error, Debug, PartialEq)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ParseError {
-    #[error("Empty line")]
+    // Empty line
+    #[error("Empty line, cannot parse attributes")]
     Empty,
-    #[error("Invalid GTF line")]
-    Invalid,
+
+    // Missing gene_id attribute
+    #[error("Missing attribute in: {0}")]
+    MissingFeature(String),
 }
 
 #[cfg(test)]
@@ -74,34 +88,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_pair_gtf() {
-        let line = " gene_name \"DDX11L1\"";
-        let (key, value) = get_pair(line).unwrap();
-        assert_eq!(key, "gene_name");
-        assert_eq!(value, "DDX11L1");
-    }
-
-    #[test]
     fn test_parse_gtf() {
         let line = "gene_id \"ENSG00000223972\"; gene_type \"transcribed_unprocessed_pseudogene\"; gene_name \"DDX11L1\"; level 2; havana_gene OTTHUMG00000000961.1;";
         let feature = "gene_id".to_string();
-        let attr = Attribute::parse(&line.to_string(), &feature).unwrap();
+        let attr = Attribute::parse::<b' '>(&line, &feature).unwrap();
         assert_eq!(attr.feature, "ENSG00000223972");
-    }
-
-    #[test]
-    fn test_get_pair_gff() {
-        let line = "ID=ENSG00000223972";
-        let (key, value) = get_pair(line).unwrap();
-        assert_eq!(key, "ID");
-        assert_eq!(value, "ENSG00000223972");
     }
 
     #[test]
     fn test_parse_gff() {
         let line = "ID=ENSG00000223972;Name=DDX11L1;biotype=transcribed_unprocessed_pseudogene";
         let feature = "ID".to_string();
-        let attr = Attribute::parse(&line.to_string(), &feature).unwrap();
+        let attr = Attribute::parse::<b'='>(&line, &feature).unwrap();
         assert_eq!(attr.feature, "ENSG00000223972");
     }
 }
