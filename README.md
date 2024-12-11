@@ -90,6 +90,16 @@ Options:
     --threads/-t: number of threads (default: max ncpus)
 ```
 
+> [!TIP]
+> The interpretation of the `--parent/-p`, `--child/-c` and `--feature/-f` arguments is as follows:
+> - `--parent/-p`: the parent node is the name of the record in the second column of the .gtf that will work as rule to extract the child nodes.
+> - `--child/-c`: the child node is the name of the record in the second column of the .gtf that the tool will extract and build coordinates from
+> - `--feature/-f`: the feature is the name of the attribute that will be extracted from the attribute line of the .gtf file in order to match parent and child
+>
+> The most common case is to use `--parent/-p "transcript" --child/-c "exon" --feature/-f "transcript_id"` to extract exons from transcripts, but the tool
+> gives you the flexibility to extract any feature from any parent-child relationship in the .gtf file, like 3' UTRs, 5' UTRs, CDS, etc. For the latter,
+> you can use `--parent/-p "transcript" --child/-c "three_prime_UTR" --feature/-f "trancript_id"` to extract 3'UTRs from genes, for example.
+
 ## Installation
 to install gxf2bed on your system follow this steps:
 1. get rust: `curl https://sh.rustup.rs -sSf | sh` on unix, or go [here](https://www.rust-lang.org/tools/install) for other options
