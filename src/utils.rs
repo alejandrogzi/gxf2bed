@@ -39,31 +39,42 @@ pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMa
 
     let mut writer: Box<dyn Write> = match filename.as_ref().extension() {
         Some(ext) if ext == "gz" => {
-            Box::new(BufWriter::new(GzEncoder::new(f, Compression::default())))
+            Box::new(BufWriter::new(GzEncoder::new(f, Compression::fast())))
         }
         _ => Box::new(BufWriter::new(f)),
     };
 
+    let mut warn_missing_child_count = 0;
     for x in liner.iter() {
         let start = x.1.get("start").unwrap().parse::<u32>().unwrap();
         let start_codon = x.1.get("start_codon").unwrap_or(x.1.get("start").unwrap());
         let end_codon = x.1.get("stop_codon").unwrap_or(x.1.get("end").unwrap());
 
-        let mut exon_sizes =
-            x.1.get("exon_sizes")
-                .unwrap()
-                .split(",")
+        let mut exon_sizes = if let Some(exon_sizes) = x.1.get("exon_sizes") {
+            exon_sizes
+                .split(',')
                 .filter(|x| !x.is_empty())
-                .collect::<Vec<&str>>();
+                .collect::<Vec<&str>>()
+        } else {
+            warn_missing_child_count += 1;
+            Vec::new()
+        };
 
-        let mut exon_starts =
-            x.1.get("exon_starts")
-                .unwrap()
-                .split(",")
+        let mut exon_starts = if let Some(exon_starts) = x.1.get("exon_starts") {
+            exon_starts
+                .split(',')
                 .filter(|x| !x.is_empty())
                 .map(|x| x.parse::<u32>().unwrap() - start)
                 .map(|x| x.to_string())
-                .collect::<Vec<String>>();
+                .collect::<Vec<String>>()
+        } else {
+            warn_missing_child_count += 1;
+            Vec::new()
+        };
+
+        if exon_sizes.is_empty() || exon_starts.is_empty() {
+            continue;
+        }
 
         if x.1.get("strand") == Some(&String::from("-")) {
             exon_sizes.reverse();
@@ -87,6 +98,11 @@ pub fn write_obj<P: AsRef<Path> + Debug>(filename: P, liner: Vec<(String, HashMa
         );
         writeln!(writer, "{}", line).unwrap();
     }
+
+    log::warn!(
+        "{} entries were skipped due to missing child!",
+        warn_missing_child_count
+    );
 
     writer.flush().unwrap();
     log::info!("Done writing!");
