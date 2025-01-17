@@ -1,6 +1,6 @@
 [package]
 name = "gxf2bed"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["alejandrogzi <alejandrxgzi@gmail.com>"]
 edition = "2021"
 license = "MIT"
