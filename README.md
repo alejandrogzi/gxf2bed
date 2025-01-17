@@ -66,12 +66,6 @@ Converts
 - *Canis lupus familiaris* ROS_Cfam_1.0 Ensembl 112 (54,144 transcripts) in 0.501 seconds.
 - *Gallus galus* bGalGal1 Ensembl 112 (72,689 transcripts) in 0.529 seconds.
 
-> What's new on v.0.2.3
->
-> - gxf2bed now is even x2 faster and can convert the human annotation in 1.5 seconds!
-> - including bench to support results in README and update benchamrk results + metrics.
-> - implements free compressed conversion between formats: gtf/gtf.gz/gff/gff.gz to bed/bed.gz!
-
 
 ## Usage
 ``` rust
