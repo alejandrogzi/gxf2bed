@@ -65,25 +65,38 @@ pub fn to_bed<'a>(
         .fold(
             || HashMap::new(),
             |mut acc, record| {
-                let feature = record.attr.feature().to_owned();
-                let entry = acc.entry(feature).or_insert_with(GenePred::new);
+                let key = record.attr.feature().to_owned();
+                let entry = acc.entry(key).or_insert_with(GenePred::new);
 
+                // parent sets transcript bounds
                 if record.feature == parent {
-                    entry.chr = record.chr.to_owned();
+                    entry.chr = record.chr.clone();
                     entry.start = record.start;
                     entry.end = record.end;
                     entry.strand = record.strand;
                     entry.record_type = RecordType::Parent;
-                } else if record.feature == child {
-                    entry.chr = record.chr.to_owned();
-                    entry.strand = record.strand;
-                    entry.start = record.start.min(entry.start);
-                    entry.end = record.end.max(entry.end);
-                    entry
-                        .exons
-                        .insert((record.start, record.end - record.start));
+                }
+
+                // always collect real exon segments
+                if record.feature == "exon" {
+                    entry.exons.insert((record.start, record.end - record.start));
+                }
+
+                // child flag (e.g. CDS) extends transcript & optionally sets CDS bounds
+                if record.feature == child {
+                    // extend transcript region
+                    entry.start = entry.start.min(record.start);
+                    entry.end   = entry.end.max(record.end);
                     if entry.record_type != RecordType::Parent {
                         entry.record_type = RecordType::Child;
+                    }
+
+                    // if user asked -c CDS, record coding region limits
+                    if child == "CDS" {
+                        entry.cds_start = Some(entry.cds_start
+                            .map_or(record.start, |cs| cs.min(record.start)));
+                        entry.cds_end   = Some(entry.cds_end
+                            .map_or(record.end, |ce| ce.max(record.end)));
                     }
                 }
 
@@ -93,8 +106,8 @@ pub fn to_bed<'a>(
         .reduce(
             || HashMap::new(),
             |mut left, right| {
-                for (feature, info) in right {
-                    let entry = left.entry(feature).or_insert_with(GenePred::new);
+                for (k, info) in right {
+                    let entry = left.entry(k).or_insert_with(GenePred::new);
                     entry.merge(info);
                 }
                 left

@@ -46,6 +46,8 @@ pub struct GenePred {
     pub strand: Strand,
     pub exons: BTreeSet<(u64, u64)>,
     pub record_type: RecordType,
+    pub cds_start: Option<u64>,
+    pub cds_end: Option<u64>,
 }
 
 impl GenePred {
@@ -57,6 +59,8 @@ impl GenePred {
             strand: Strand::Unknown,
             exons: BTreeSet::new(),
             record_type: RecordType::Unknown,
+            cds_start: None,
+            cds_end: None,
         }
     }
 
@@ -103,6 +107,13 @@ impl GenePred {
                 }
             }
         }
+
+        if let Some(qs) = query.cds_start {
+            self.cds_start = Some(self.cds_start.map_or(qs, |cs| cs.min(qs)));
+        }
+        if let Some(qe) = query.cds_end {
+            self.cds_end = Some(self.cds_end.map_or(qe, |ce| ce.max(qe)));
+        }
     }
 
     pub fn get_exon_count(&self) -> usize {
@@ -130,11 +141,11 @@ impl GenePred {
     }
 
     pub fn get_cds_start(&self) -> u64 {
-        self.exons.first().unwrap().0
+        self.cds_start.unwrap_or(self.start)
     }
 
     pub fn get_cds_end(&self) -> u64 {
-        self.exons.last().unwrap().0 + self.exons.last().unwrap().1
+        self.cds_end.unwrap_or(self.end)
     }
 
     pub fn get_cds(&self) -> (u64, u64) {
@@ -267,6 +278,8 @@ mod tests {
             strand: Strand::Forward,
             exons: vec![(11868, 50), (12200, 100)].into_iter().collect(),
             record_type: RecordType::Parent,
+            cds_start: Some(11868),
+            cds_end: Some(12300),
         };
 
         gene_pred.merge(query);
