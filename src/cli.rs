@@ -1,3 +1,6 @@
+//! The fastest GTF/GFF-to-BED converter chilling around
+//! Alejandro Gonzales-Irribarren, 2025
+
 use clap::Parser;
 use std::path::PathBuf;
 use thiserror::Error;

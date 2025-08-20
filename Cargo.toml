@@ -1,6 +1,6 @@
 [package]
 name = "gxf2bed"
-version = "0.2.6"
+version = "0.2.7"
 authors = ["alejandrogzi <alejandrxgzi@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -14,7 +14,6 @@ default-run = "gxf2bed"
 
 [dependencies]
 thiserror = "1.0"
-rayon = "1.8.0"
 num_cpus = "1.16.0"
 clap = { version = "4.0", features = ["derive"] }
 libc = "0.2.151"
@@ -22,7 +21,7 @@ log = "0.4.14"
 simple_logger = "4.0.0"
 indoc = "2.0"
 colored = "2.0.0"
-hashbrown = { version = ">0.12", features = ["rayon"] }
+hashbrown = { version = ">0.12" }
 flate2 = "1.0.20"
 
 [profile.release]

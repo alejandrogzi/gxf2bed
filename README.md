@@ -5,7 +5,7 @@
 
   <p align="center">
     <a href="https://img.shields.io/badge/version-0.1.0dev-green" target="_blank">
-      <img alt="Version Badge" src="https://img.shields.io/badge/version-0.2.3-green">
+      <img alt="Version Badge" src="https://img.shields.io/badge/version-0.2.7-green">
     </a>
     <a href="https://crates.io/crates/gxf2bed" target="_blank">
       <img alt="Crates.io Version" src="https://img.shields.io/crates/v/gxf2bed">
