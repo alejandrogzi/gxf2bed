@@ -360,7 +360,10 @@ pub fn write_obj<P: AsRef<Path> + Debug>(
     for (transcript, mut info) in data.into_iter() {
         if info.exons.is_empty() {
             skips += 1;
-            continue;
+            let exon = (info.start, info.end - info.start);
+            info.exons = BTreeSet::new();
+            info.exons.insert(exon);
+            // continue;
         }
 
         // INFO: storing original target coords to be used as CDS bounds
@@ -391,10 +394,14 @@ pub fn write_obj<P: AsRef<Path> + Debug>(
             // INFO: adjusting CDS start/end to include stop codons
             match info.strand {
                 crate::gxf::Strand::Forward => {
-                    cds_end += 3;
+                    if cds_end + 3 <= info.end {
+                        cds_end += 3;
+                    }
                 }
                 crate::gxf::Strand::Reverse => {
-                    cds_start -= 3;
+                    if cds_start - 3 >= info.start {
+                        cds_start -= 3;
+                    }
                 }
                 _ => {
                     log::error!("ERROR: Unknown strand in record {:?}", info);
@@ -423,8 +430,17 @@ pub fn write_obj<P: AsRef<Path> + Debug>(
 
         let (exon_sizes, exon_starts) = info.get_exons_info();
 
-        if (cds_start >= cds_end) || (info.start >= info.end) {
-            log::error!("ERROR: start >= end in record {:?}", info);
+        if (cds_start >= cds_end)
+            || (info.start >= info.end)
+            || (cds_start < info.start)
+            || (cds_end > info.end)
+        {
+            log::error!(
+                "ERROR: start >= end or corrupted coords in record {:?} {:?} {:?}",
+                info,
+                cds_start,
+                cds_end
+            );
             std::process::exit(1);
         }
 
@@ -490,7 +506,7 @@ mod test {
         chr1	HAVANA	three_prime_utr	92841863	92841924	.	+	.	gene_symbol "RPL5"; gene_id "ENSG00000122406.14"; gene_name "RPL5"; transcript_id "RPL5-202"; transcript_name "RPL5-202";"#;
 
         let data = to_bed(
-            &content,
+            content,
             "transcript".to_string(),
             &"exon".to_string(),
             "transcript_id".to_string(),
@@ -529,7 +545,7 @@ mod test {
         chr1	HAVANA	three_prime_utr	92841863	92841924	.	+	.	gene_symbol "RPL5"; gene_id "ENSG00000122406.14"; gene_name "RPL5"; transcript_id "RPL5-202"; transcript_name "RPL5-202";"#;
 
         let data = to_bed(
-            &content,
+            content,
             "transcript".to_string(),
             &"CDS".to_string(),
             "transcript_id".to_string(),
@@ -564,7 +580,7 @@ mod test {
         chr1	HAVANA	three_prime_utr	92841863	92841924	.	+	.	gene_symbol "RPL5"; gene_id "ENSG00000122406.14"; gene_name "RPL5"; transcript_id "RPL5-202"; transcript_name "RPL5-202";"#;
 
         let data = to_bed(
-            &content,
+            content,
             "transcript".to_string(),
             &"five_prime_utr".to_string(),
             "transcript_id".to_string(),
@@ -605,7 +621,7 @@ mod test {
         chr1	HAVANA	three_prime_utr	92841863	92841924	.	+	.	gene_symbol "RPL5"; gene_id "ENSG00000122406.14"; gene_name "RPL5"; transcript_id "RPL5-202"; transcript_name "RPL5-202";"#;
 
         let data = to_bed(
-            &content,
+            content,
             "transcript".to_string(),
             &"three_prime_utr".to_string(),
             "transcript_id".to_string(),
@@ -654,7 +670,7 @@ mod test {
             chr7	HAVANA	UTR	43831645	43832030	.	+	.	gene_id \"ENSMUSG00000050063.18\"; transcript_id \"ENSMUST00000107968.9\"; gene_type \"protein_coding\"; gene_status \"KNOWN\"; gene_name \"Klk6\"; transcript_type \"protein_coding\"; transcript_status \"KNOWN\"; transcript_name \"Klk6-001\"; level 2; protein_id \"ENSMUSP00000103602.3\"; transcript_support_level \"1\"; tag \"NAGNAG_splice_site\"; tag \"basic\"; tag \"appris_principal_1\"; tag \"CCDS\"; ccdsid \"CCDS21184.2\"; havana_gene \"OTTMUSG00000022524.6\"; havana_transcript \"OTTMUST00000053947.4\";"#;
 
         let data = to_bed(
-            &content,
+            content,
             "transcript".to_string(),
             &"CDS".to_string(),
             "transcript_id".to_string(),
