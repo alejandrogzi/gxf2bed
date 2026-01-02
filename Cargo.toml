@@ -1,6 +1,6 @@
 [package]
 name = "gxf2bed"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["alejandrogzi <jose.gonzalesdezavala1@unmsm.edu.pe>"]
 edition = "2021"
 license = "MIT"
@@ -12,22 +12,23 @@ keywords = ["bed", "gtf", "gff" ,"cli", "convert"]
 categories = ["command-line-utilities", "science"]
 
 [dependencies]
-thiserror = "1.0"
-rayon = "1.8.0"
+thiserror = "2.0"
+rayon = "1.11.0"
 num_cpus = "1.16.0"
 clap = {version = "4.0", features = ["derive"]}
 libc = "0.2.151"
 log = "0.4.14"
-simple_logger = "4.0.0"
+simple_logger = "5.0.0"
 indoc = "2.0"
-colored = "2.0.0"
+colored = "3.0.0"
 hashbrown = {version=">0.12", features=["rayon"]}
+genepred = {version="0.0.6", features=["rayon", "mmap", "gzip", "zstd", "bz2"]}
+tempfile = "3.23.0"
+
+[dev-dependencies]
+flate2 = { version = "1.0", default-features = false, features = ["rust_backend"] }
 
 [profile.release]
 lto = true
-
-[lib]
-name = "gxf2bed"
-path = "src/lib.rs"
-
-
+codegen-units = 1
+opt-level = 3
