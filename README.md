@@ -1,10 +1,43 @@
-![Crates.io](https://img.shields.io/crates/v/gxf2bed?color=green)
-![GitHub](https://img.shields.io/github/license/alejandrogzi/gxf2bed?color=blue)
-![Crates.io Total Downloads](https://img.shields.io/crates/d/gxf2bed)
-![Conda Platform](https://img.shields.io/conda/pn/bioconda/gxf2bed)
+<p align="center">
+  <p align="center">
+    <img width=200 align="center" src="./supp/logo.png" >
+  </p>
 
-# gxf2bed
-The fastest G{F,T}F-to-BED converter around the block! 
+  <span>
+    <h1 align="center">
+        gxf2bed
+    </h1>
+  </span>
+
+  <p align="center">
+    <a href="https://img.shields.io/badge/version-0.3.0-green" target="_blank">
+      <img alt="Version Badge" src="https://img.shields.io/badge/version-0.3.0-green">
+    </a>
+    <a href="https://crates.io/crates/gxf2bed" target="_blank">
+      <img alt="Crates.io Version" src="https://img.shields.io/crates/v/gxf2bed">
+    </a>
+    <a href="https://github.com/alejandrogzi/gxf2bed" target="_blank">
+      <img alt="GitHub License" src="https://img.shields.io/github/license/alejandrogzi/gxf2bed?color=blue">
+    </a>
+    <a href="https://crates.io/crates/gxf2bed" target="_blank">
+      <img alt="Crates.io Total Downloads" src="https://img.shields.io/crates/d/gxf2bed">
+    </a>
+  </p>
+
+  <p align="center">
+    <samp>
+        <span> versatile BED-to-G{T,F}F converter in Rust</span>
+        <br>
+        <br>
+        <a href="https://docs.rs/gxf2bed/0.3.0/gxf2bed/">docs</a> .
+        <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Usage">usage</a> .
+        <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Features">features</a> .
+        <a href="https://github.com/alejandrogzi/gxf2bed/blob/master/assets/EXAMPLES.md">examples</a>
+    </samp>
+  </p>
+
+</p>
+
 
 translates
 
@@ -17,42 +50,47 @@ chr27 gxf2bed exon 17266470 17266572 . + . gene_id "ENSG00000151743"; transcript
 
 ...
 ```
+
 into
+
 
 ```
 chr27 17266469 17281218 ENST00000541931.8 1000 + 17266469 17281218 0,0,200 2 103,74, 0,14675,
 ```
-before your eyes blink!
 
 
-Converts
-- *Homo sapiens* GRCh38 GENCODE 44 (252,835 transcripts) in 2.99 seconds.
-- *Mus musculus* GRCm39 GENCODE 44 (149,547 transcritps) in 1.91 seconds.
-- *Canis lupus familiaris* ROS_Cfam_1.0 Ensembl 110 (55,335 transcripts) in 0.95 seconds. 
-- *Gallus galus* bGalGal1 Ensembl 110 (72,689 transcripts) in 1.07 seconds.
-
-> What's new on v.0.2.2
+> What's new on v.0.3
 >
-> - Allows translation without relationships to be compatible with Prokka outputs
-> - To perform plain translation without hierarchy just explicitly declare `--parent "" --child ""`
+> - Converts GTF and GFF3 files to BED format
+> - Supports multiple BED formats (BED3, BED4, BED5, BED6, BED9, BED12)
+> - Handles compressed input files (gzip, zstd, bzip2)
+> - Customizable parent/child feature and attribute mapping
+> - Optional additional fields from GTF/GFF attributes
+> - Memory-mapped I/O for uncompressed files
+> - Uses [genepred](https://github.com/alejandrogzi/genepred) for parsing and writing
 
 
 ## Usage
-``` rust
-Usage: gxf2bed[EXE] --input/-i <GTF/GFF> --output/-o <BED> [--parent/-p <PARENT>] [--child/-c <CHILD>] [--feature/-f <FEATURE>]
- 
-Arguments:
-    --input/-i <GTF/GFF>: a .gtf/.gff file
-    --output/-o <BED>: path to output .bed file
-    --parent/-p <PARENT>: parent node [default: "transcript"]
-    --child/-c <CHILD>: child node [default: "exon"]
-    --feature/-f <FEATURE>: feature to extract from the attribute line [default: "transcript_id"]
+ ```bash
+ gxf2bed -i <INPUT> -o <OUTPUT> [OPTIONS]
 
-Options:
-    --help: print help
-    --version: print version
-    --threads/-t: number of threads (default: max ncpus)
+ Required arguments:
+   -i, --input <GXF>          Path to GTF/GFF file
+   -o, --output <BED>         Path to output BED file
+
+ Optional arguments:
+   -T, --threads <THREADS>    Number of threads (default: CPU count)
+   -F, --parent-feature <PARENT>     Parent feature
+   -f, --child-features <CHILDS>    Child features (comma-separated)
+   -A, --parent-attribute <FEATURE>  Feature to extract
+   -a, --child-attribute <CHILD>     Child feature to extract
+   -t, --type <BED_TYPE>      BED type format (3, 4, 5, 6, 9, 12) [default: 12]
+   -d, --additional-fields <ADDITIONAL>  BED additional fields (comma-separated)
+   -c, --chunks <CHUNKS>      Chunk size for parallel processing [default: 15000]
+   -h, --help                 Print help
+   -V, --version              Print version
 ```
+
 
 ## Installation
 to install gxf2bed on your system follow this steps:
@@ -79,7 +117,9 @@ to build the development container image:
 to use gxf2bed through Conda just:
 1. `conda install gxf2bed -c bioconda` or `conda create -n gxf2bed -c bioconda gxf2bed`
 
-
+> [!WARNING]
+> The data in this benchmark corresponds to version 0.2.* and below. Versions >0.3 are 
+> a bit slower than the previous versions due to algorithmic changes.
 ## Benchmark + FAQ
 <p align="center">
     <img width=700 align="center" src="./supp/gxf2bed.jpg">
