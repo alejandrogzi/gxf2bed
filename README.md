@@ -137,4 +137,3 @@ Besides the easy way to make `gxf2bed` run and the GFF-GTF channel that allows c
 
 Taken together, `gxf2bed` offers an easier and faster way to convert GTF/GFF files to BED files. This tool could save you at least x2-3 times the time you used to spend using other tools to convert GTF files and x5 times if you want to convert GFF3 files!
 
-

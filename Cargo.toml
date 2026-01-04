@@ -1,21 +1,22 @@
 [package]
 name = "gxf2bed"
 version = "0.3.0"
-authors = ["alejandrogzi <jose.gonzalesdezavala1@unmsm.edu.pe>"]
+authors = ["alejandrogzi <alejandrxgzi@gmail.com>"]
 edition = "2021"
 license = "MIT"
-description = "Fastest GTF/GFF-to-BED converter chilling around"
+description = "fastest GTF/GFF-to-BED converter chilling around"
 homepage = "https://github.com/alejandrogzi/gxf2bed"
 repository = "https://github.com/alejandrogzi/gxf2bed"
 readme = "README.md"
-keywords = ["bed", "gtf", "gff" ,"cli", "convert"]
+keywords = ["bed", "gtf", "gff", "cli", "convert"]
 categories = ["command-line-utilities", "science"]
+default-run = "gxf2bed"
 
 [dependencies]
 thiserror = "2.0"
 rayon = "1.11.0"
 num_cpus = "1.16.0"
-clap = {version = "4.0", features = ["derive"]}
+clap = { version = "4.0", features = ["derive"] }
 libc = "0.2.151"
 log = "0.4.14"
 simple_logger = "5.0.0"
@@ -32,3 +33,4 @@ flate2 = { version = "1.0", default-features = false, features = ["rust_backend"
 lto = true
 codegen-units = 1
 opt-level = 3
+

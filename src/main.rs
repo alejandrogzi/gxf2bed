@@ -69,10 +69,6 @@
 //! ```bash
 //! gxf2bed -i annotations.gff -o output.bed -F "" -f ""
 //! ```
-
-use clap::Parser;
-use log::Level;
-
 use gxf2bed::{run, Args, Config};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

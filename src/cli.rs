@@ -6,7 +6,7 @@ use std::path::PathBuf;
 #[clap(
     name = "gxf2bed",
     version = env!("CARGO_PKG_VERSION"),
-    author = "Alejandro Gonzales-Irribarren <jose.gonzalesdezavala1@unmsm.edu.pe>",
+    author = "Alejandro Gonzales-Irribarren <alejandrxgzi@gmail.com>",
     about = "Fastest GTF/GFF-to-BED converter chilling around"
 )]
 pub struct Args {
