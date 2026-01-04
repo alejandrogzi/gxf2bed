@@ -31,8 +31,8 @@
         <br>
         <a href="https://docs.rs/gxf2bed/0.3.0/gxf2bed/">docs</a> .
         <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Usage">usage</a> .
-        <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Features">features</a> .
-        <a href="https://github.com/alejandrogzi/gxf2bed/blob/master/assets/EXAMPLES.md">examples</a>
+        <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Installation">installation</a> .
+        <a href="https://github.com/alejandrogzi/gxf2bed/?tab=readme-ov-file#Conda">conda</a> 
     </samp>
   </p>
 
@@ -117,10 +117,10 @@ to build the development container image:
 to use gxf2bed through Conda just:
 1. `conda install gxf2bed -c bioconda` or `conda create -n gxf2bed -c bioconda gxf2bed`
 
+## Benchmark + FAQ
 > [!WARNING]
 > The data in this benchmark corresponds to version 0.2.* and below. Versions >0.3 are 
 > a bit slower than the previous versions due to algorithmic changes.
-## Benchmark + FAQ
 <p align="center">
     <img width=700 align="center" src="./supp/gxf2bed.jpg">
 </p>
