@@ -1,19 +1,16 @@
-//! The fastest GTF/GFF-to-BED converter chilling around
-//! Alejandro Gonzales-Irribarren, 2025
-
 use clap::Parser;
 use std::path::PathBuf;
-use thiserror::Error;
 
+/// CLI arguments for gxf2bed.
 #[derive(Parser, Debug)]
 #[clap(
     name = "gxf2bed",
     version = env!("CARGO_PKG_VERSION"),
     author = "Alejandro Gonzales-Irribarren <alejandrxgzi@gmail.com>",
-    about = "fastest GTF/GFF-to-BED converter chilling around"
+    about = "Fastest GTF/GFF-to-BED converter chilling around"
 )]
 pub struct Args {
-    /// fastest G{T,F}F-to-BED converter chilling around the world!
+    /// The fastest G{T,F}F-to-BED converter chilling around the world!
     ///
     /// This program converts GTF/GFF3 files to BED format blazingly fast.
     /// Start by providing the path to the GTF/GFF3 file with -i/--input file.gtf
@@ -27,9 +24,7 @@ pub struct Args {
     )]
     pub gxf: PathBuf,
 
-    /// Output filepath; non-required argument.
-    ///
-    /// The output file will be a BED file with the same name as the input file.
+    /// Output filepath; required argument.
     #[clap(
         short = 'o',
         long = "output",
@@ -41,7 +36,7 @@ pub struct Args {
 
     /// Number of threads to use; default is the number of logical CPUs.
     #[clap(
-        short = 't',
+        short = 'T',
         long,
         help = "Number of threads",
         value_name = "THREADS",
@@ -51,101 +46,170 @@ pub struct Args {
 
     /// Parent feature; default is "transcript_id".
     #[clap(
-        short = 'p',
-        long = "parent",
+        short = 'F',
+        long = "parent-feature",
         help = "Parent feature",
-        value_name = "PARENT",
-        default_value = "transcript"
+        value_name = "PARENT"
     )]
-    pub parent: String,
+    pub parent_feature: Option<String>,
 
     /// Child feature; default is "exon".
     #[clap(
-        short = 'c',
-        long = "child",
-        help = "Child feature",
-        value_name = "CHILD",
-        default_value = "exon"
-    )]
-    pub child: String,
-
-    /// Feature to extract; default is "transcript_id".
-    #[clap(
         short = 'f',
-        long = "feature",
-        help = "Feature to extract",
-        value_name = "FEATURE",
-        default_value = "transcript_id"
+        long = "child-features",
+        help = "Child features",
+        value_name = "CHILDS",
+        value_delimiter = ',',
+        num_args = 1..,
     )]
-    pub feature: String,
+    pub child_features: Option<Vec<String>>,
+
+    /// Feature to extract.
+    #[clap(
+        short = 'A',
+        long = "parent-attribute",
+        help = "Feature to extract",
+        value_name = "FEATURE"
+    )]
+    pub parent_attribute: Option<String>,
+
+    /// Child feature to extract.
+    #[clap(
+        short = 'a',
+        long = "child-attribute",
+        help = "Child feature to extract",
+        value_name = "CHILD"
+    )]
+    pub child_attribute: Option<String>,
+
+    /// BED type format.
+    #[clap(
+        short = 't',
+        long = "type",
+        help = "BED type format",
+        value_name = "BED_TYPE",
+        default_value_t = BedType::Bed12
+    )]
+    pub bed_type: BedType,
+
+    /// BED additional fields (will use GTF/GFF tags).
+    #[clap(
+        short = 'd',
+        long = "additional-fields",
+        help = "BED additional fields",
+        value_name = "ADDITIONAL",
+        value_delimiter = ',',
+        num_args = 1..,
+    )]
+    pub additional_fields: Option<Vec<String>>,
+
+    /// Chunk size for parallel processing.
+    #[clap(
+        short = 'c',
+        long = "chunks",
+        help = "Chunk size for parallel processing",
+        value_name = "CHUNKS",
+        default_value_t = 15000
+    )]
+    pub chunks: usize,
 }
 
-impl Args {
-    /// Checks all the arguments for validity using validate_args()
-    pub fn check(&self) -> Result<(), ArgError> {
-        self.validate_args()
-    }
+/// Supported output BED formats.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BedType {
+    Bed3,
+    Bed4,
+    Bed5,
+    Bed6,
+    Bed9,
+    Bed12,
+}
 
-    /// Checks the input file for validity. The file must exist and be a GTF or GFF3 file.
-    /// If the file does not exist, an error is returned.
-    fn check_input(&self) -> Result<(), ArgError> {
-        if !self.gxf.exists() {
-            let err = format!("file {:?} does not exist", self.gxf);
-            Err(ArgError::InvalidInput(err))
-        } else if std::fs::metadata(&self.gxf).unwrap().len() == 0 {
-            let err = format!("file {:?} is empty", self.gxf);
-            return Err(ArgError::InvalidInput(err));
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Checks the output file for validity. If the file is not a BED file, an error is returned.
-    fn check_output(&self) -> Result<(), ArgError> {
-        if !self.output.extension().unwrap().eq("bed") & !self.output.extension().unwrap().eq("gz")
-        {
-            let err = format!("file {:?} is not a BED file", self.output);
-            Err(ArgError::InvalidOutput(err))
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Checks the number of threads for validity. The number of threads must be greater than 0
-    /// and less than or equal to the number of logical CPUs.
-    fn check_threads(&self) -> Result<(), ArgError> {
-        if self.threads == 0 {
-            let err = "number of threads must be greater than 0".to_string();
-            Err(ArgError::InvalidThreads(err))
-        } else if self.threads > num_cpus::get() {
-            let err = "number of threads must be less than or equal to the number of logical CPUs"
-                .to_string();
-            return Err(ArgError::InvalidThreads(err));
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Validates all the arguments
-    fn validate_args(&self) -> Result<(), ArgError> {
-        self.check_input()?;
-        self.check_output()?;
-        self.check_threads()?;
-        Ok(())
+impl Default for BedType {
+    /// Returns the default BED output format (BED12).
+    ///
+    /// # Returns
+    ///
+    /// The default BED12 format variant.
+    ///
+    /// # Example
+    ///
+    /// ```rust, ignore
+    /// use gxf2bed::BedType;
+    /// let default = BedType::default();
+    /// assert_eq!(default, BedType::Bed12);
+    /// ```
+    fn default() -> Self {
+        BedType::Bed12
     }
 }
 
-#[derive(Debug, Error)]
-pub enum ArgError {
-    /// The input file does not exist or is not a GTF or GFF3 file.
-    #[error("Invalid input: {0}")]
-    InvalidInput(String),
+impl std::str::FromStr for BedType {
+    type Err = String;
 
-    /// The output file is not a BED file.
-    #[error("Invalid output: {0}")]
-    InvalidOutput(String),
+    /// Parses a BED type from its numeric representation.
+    ///
+    /// # Arguments
+    ///
+    /// * `s` - String slice containing the numeric BED type (3, 4, 5, 6, 9, or 12)
+    ///
+    /// # Returns
+    ///
+    /// Returns the corresponding BedType variant or an error for invalid values.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the input string doesn't match a supported BED type.
+    ///
+    /// # Example
+    ///
+    /// ```rust, ignore
+    /// use gxf2bed::BedType;
+    /// use std::str::FromStr;
+    ///
+    /// let bed_type = BedType::from_str("12").unwrap();
+    /// assert_eq!(bed_type, BedType::Bed12);
+    /// ```
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "3" => Ok(BedType::Bed3),
+            "4" => Ok(BedType::Bed4),
+            "5" => Ok(BedType::Bed5),
+            "6" => Ok(BedType::Bed6),
+            "9" => Ok(BedType::Bed9),
+            "12" => Ok(BedType::Bed12),
+            _ => Err(format!("Invalid BED type: {}", s)),
+        }
+    }
+}
 
-    /// The number of threads is invalid.
-    #[error("Invalid number of threads: {0}")]
-    InvalidThreads(String),
+impl std::fmt::Display for BedType {
+    /// Formats the BED type as its numeric representation.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - Formatter to write the BED type to
+    ///
+    /// # Returns
+    ///
+    /// Returns a formatting result indicating success or failure.
+    ///
+    /// # Example
+    ///
+    /// ```rust, ignore
+    /// use gxf2bed::BedType;
+    ///
+    /// let bed_type = BedType::Bed12;
+    /// assert_eq!(format!("{}", bed_type), "12");
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BedType::Bed3 => write!(f, "3"),
+            BedType::Bed4 => write!(f, "4"),
+            BedType::Bed5 => write!(f, "5"),
+            BedType::Bed6 => write!(f, "6"),
+            BedType::Bed9 => write!(f, "9"),
+            BedType::Bed12 => write!(f, "12"),
+        }
+    }
 }
