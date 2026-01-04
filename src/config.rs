@@ -28,21 +28,21 @@ pub struct Config {
 
 impl Config {
     /// Builds a conversion config from CLI arguments.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `args` - Command-line arguments to convert into a configuration
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a new Config instance with values copied from the CLI arguments.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::{Args, Config};
     /// use std::path::PathBuf;
-    /// 
+    ///
     /// let args = Args {
     ///     gxf: PathBuf::from("input.gtf"),
     ///     output: PathBuf::from("output.bed"),

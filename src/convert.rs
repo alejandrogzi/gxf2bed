@@ -20,28 +20,28 @@ pub struct RunStats {
 }
 
 /// Runs a conversion with the provided configuration.
-/// 
+///
 /// This function orchestrates the entire GTF/GFF to BED conversion process,
 /// including input detection, parallel processing, and output writing.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `config` - Configuration containing all conversion parameters
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns RunStats containing timing and memory usage information.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if any step of the conversion fails.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::{Config, run};
 /// use std::path::PathBuf;
-/// 
+///
 /// let config = Config {
 ///     input: PathBuf::from("input.gtf"),
 ///     output: PathBuf::from("output.bed"),
@@ -83,28 +83,28 @@ pub fn run(config: &Config) -> Result<RunStats> {
 }
 
 /// Processes an input file based on the detected format.
-/// 
+///
 /// This function dispatches to the appropriate reader type based on whether
 /// the input is GTF or GFF format.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `path` - Path to the input file
 /// * `input_kind` - Detected format and compression information
 /// * `reader_options` - Reader configuration options
 /// * `config` - Main conversion configuration
 /// * `writer_options` - Writer configuration options
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns processed data chunks ready for output.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if the input processing fails.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::process_input;
 /// use std::path::Path;
@@ -136,28 +136,28 @@ fn process_input(
 }
 
 /// Processes a reader into in-memory BED chunks.
-/// 
+///
 /// This function opens the appropriate reader, processes the input in parallel chunks,
 /// and renders each chunk into BED format bytes.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `path` - Path to the input file
 /// * `reader_options` - Reader configuration options
 /// * `config` - Main conversion configuration
 /// * `writer_options` - Writer configuration options
 /// * `compression` - Compression type of the input
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns ordered chunks of BED data ready for writing.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if reading or processing fails.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::process_reader;
 /// use std::path::Path;
@@ -189,26 +189,26 @@ where
 }
 
 /// Opens a GTF/GFF reader with mmap or buffered I/O based on compression.
-/// 
+///
 /// For compressed files, uses buffered I/O. For uncompressed files,
 /// uses memory mapping for better performance.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `path` - Path to the input file
 /// * `options` - Reader configuration options
 /// * `compression` - Compression type of the input
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a configured reader for the specified format.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if the reader cannot be opened.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::open_reader;
 /// use std::path::Path;
@@ -227,20 +227,20 @@ fn open_reader<F: GxfReader>(
 }
 
 /// Builds reader options from the config.
-/// 
+///
 /// Constructs ReaderOptions based on the configuration parameters
 /// for parent/child features and attributes.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `config` - Configuration containing reader preferences
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns configured ReaderOptions for the genepred reader.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::build_reader_options;
 /// use gxf2bed::Config;
@@ -276,21 +276,21 @@ fn build_reader_options(config: &Config) -> ReaderOptions<'_> {
 }
 
 /// Builds writer options from the config.
-/// 
+///
 /// Constructs WriterOptions based on additional field configuration.
 /// If additional fields are specified, configures the allowlist
 /// and enables non-numeric extras.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `config` - Configuration containing writer preferences
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns configured WriterOptions for the BED writer.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::build_writer_options;
 /// use gxf2bed::Config;
@@ -309,27 +309,27 @@ fn build_writer_options(config: &Config) -> WriterOptions {
 }
 
 /// Renders a chunk of parsed records into BED bytes.
-/// 
+///
 /// Converts a chunk of GenePred records into the specified BED format
 /// and returns the rendered bytes along with the chunk index.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `idx` - Index of this chunk for ordering
 /// * `chunk` - Vector of parsed GenePred records
 /// * `bed_type` - Target BED format type
 /// * `writer_options` - Writer configuration options
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a tuple containing the chunk index and rendered BED bytes.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if record parsing or writing fails.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::render_chunk;
 /// // This function is typically called internally by process_reader()
@@ -353,27 +353,27 @@ fn render_chunk(
 }
 
 /// Writes a single record in the configured BED format.
-/// 
+///
 /// Converts a GenePred record to the specified BED format and writes it
 /// to the provided writer using the configured options.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `record` - GenePred record to convert
 /// * `writer` - Output writer to write the BED record to
 /// * `bed_type` - Target BED format type
 /// * `writer_options` - Writer configuration options
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns Ok(()) on successful write.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if the record cannot be written in the specified format.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::write_record;
 /// use std::io::Write;
@@ -399,25 +399,25 @@ fn write_record<W: Write>(
 }
 
 /// Writes ordered chunks to the output path.
-/// 
+///
 /// Creates the output file and writes all chunks in order,
 /// combining the parallel processed data into a single BED file.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `path` - Output file path to write to
 /// * `chunks` - Ordered vector of (index, data) tuples
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns Ok(()) on successful write.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if file creation or writing fails.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust, ignore
 /// use gxf2bed::convert::write_output;
 /// use std::path::Path;
@@ -435,23 +435,23 @@ fn write_output(path: &Path, chunks: Vec<(usize, Vec<u8>)>) -> Result<()> {
 }
 
 /// Trait for opening GTF/GFF readers with custom options.
-/// 
+///
 /// This trait abstracts over GTF and GFF readers, providing a common interface
 /// for opening readers with custom configuration options.
 trait GxfReader: genepred::BedFormat + Into<GenePred> + Sized {
     /// Opens a buffered reader with custom options.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `path` - Path to the input file
     /// * `options` - Reader configuration options
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a Reader for the specified format.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::convert::GxfReader;
     /// use genepred::Gtf;
@@ -461,20 +461,20 @@ trait GxfReader: genepred::BedFormat + Into<GenePred> + Sized {
         path: P,
         options: ReaderOptions<'_>,
     ) -> genepred::ReaderResult<Reader<Self>>;
-    
+
     /// Opens a memory-mapped reader with custom options.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `path` - Path to the input file
     /// * `options` - Reader configuration options
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a memory-mapped Reader for the specified format.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::convert::GxfReader;
     /// use genepred::Gtf;
@@ -488,18 +488,18 @@ trait GxfReader: genepred::BedFormat + Into<GenePred> + Sized {
 
 impl GxfReader for Gtf {
     /// Opens a buffered GTF reader with custom options.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `path` - Path to the GTF file
     /// * `options` - Reader configuration options
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a buffered GTF Reader.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::convert::GxfReader;
     /// use genepred::Gtf;
@@ -513,18 +513,18 @@ impl GxfReader for Gtf {
     }
 
     /// Opens a memory-mapped GTF reader with custom options.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `path` - Path to the GTF file
     /// * `options` - Reader configuration options
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a memory-mapped GTF Reader.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::convert::GxfReader;
     /// use genepred::Gtf;
@@ -540,18 +540,18 @@ impl GxfReader for Gtf {
 
 impl GxfReader for Gff {
     /// Opens a buffered GFF reader with custom options.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `path` - Path to the GFF file
     /// * `options` - Reader configuration options
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a buffered GFF Reader.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::convert::GxfReader;
     /// use genepred::Gff;
@@ -565,18 +565,18 @@ impl GxfReader for Gff {
     }
 
     /// Opens a memory-mapped GFF reader with custom options.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `path` - Path to the GFF file
     /// * `options` - Reader configuration options
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// Returns a memory-mapped GFF Reader.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust, ignore
     /// use gxf2bed::convert::GxfReader;
     /// use genepred::Gff;
