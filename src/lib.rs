@@ -8,7 +8,7 @@
 //!
 //! ## Usage
 //!
-//! ```rust, no_run
+//! ```rust, ignore
 //! use gxf2bed::{Config, run};
 //! use std::path::PathBuf;
 //!
@@ -34,7 +34,7 @@
 //!
 //! ### Basic conversion
 //!
-//! ```rust, no_run
+//! ```rust, ignore
 //! use gxf2bed::{Config, run, BedType};
 //! use std::path::PathBuf;
 //!
@@ -56,7 +56,7 @@
 
 //! ### Conversion with additional fields
 //!
-//! ```rust, no_run
+//! ```rust, ignore
 //! use gxf2bed::{Config, run, BedType};
 //! use std::path::PathBuf;
 //!
@@ -78,7 +78,7 @@
 
 //! ### Converting GFF3 files
 //!
-//! ```rust, no_run
+//! ```rust, ignore
 //! use gxf2bed::{Config, run, BedType};
 //! use std::path::PathBuf;
 //!

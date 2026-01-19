@@ -69,7 +69,10 @@
 //! ```bash
 //! gxf2bed -i annotations.gff -o output.bed -F "" -f ""
 //! ```
+use clap::Parser;
 use gxf2bed::{run, Args, Config};
+use log::Level;
+use simple_logger;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     simple_logger::init_with_level(Level::Info).unwrap();

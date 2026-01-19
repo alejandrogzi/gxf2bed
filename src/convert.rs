@@ -76,6 +76,7 @@ pub fn run(config: &Config) -> Result<RunStats> {
 
     let elapsed = start.elapsed();
     let mem_delta = (max_mem_usage_mb() - start_mem).max(0.0);
+
     Ok(RunStats {
         elapsed,
         mem_delta_mb: mem_delta,

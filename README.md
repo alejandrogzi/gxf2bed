@@ -10,8 +10,8 @@
   </span>
 
   <p align="center">
-    <a href="https://img.shields.io/badge/version-0.3.0-green" target="_blank">
-      <img alt="Version Badge" src="https://img.shields.io/badge/version-0.3.0-green">
+    <a href="https://img.shields.io/badge/version-0.3.1-green" target="_blank">
+      <img alt="Version Badge" src="https://img.shields.io/badge/version-0.3.1-green">
     </a>
     <a href="https://crates.io/crates/gxf2bed" target="_blank">
       <img alt="Crates.io Version" src="https://img.shields.io/crates/v/gxf2bed">
@@ -29,7 +29,7 @@
         <span> versatile BED-to-G{T,F}F converter in Rust</span>
         <br>
         <br>
-        <a href="https://docs.rs/gxf2bed/0.3.0/gxf2bed/">docs</a> .
+        <a href="https://docs.rs/gxf2bed/0.3.1/gxf2bed/">docs</a> .
         <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Usage">usage</a> .
         <a href="https://github.com/alejandrogzi/gxf2bed?tab=readme-ov-file#Installation">installation</a> .
         <a href="https://github.com/alejandrogzi/gxf2bed/?tab=readme-ov-file#Conda">conda</a> 
@@ -59,8 +59,9 @@ chr27 17266469 17281218 ENST00000541931.8 1000 + 17266469 17281218 0,0,200 2 103
 ```
 
 
-> What's new on v.0.3
+> What's new on v.0.3.1
 >
+> - Fixes an import typo in main.rs
 > - Converts GTF and GFF3 files to BED format
 > - Supports multiple BED formats (BED3, BED4, BED5, BED6, BED9, BED12)
 > - Handles compressed input files (gzip, zstd, bzip2)
