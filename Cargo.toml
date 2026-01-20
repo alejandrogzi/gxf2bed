@@ -1,6 +1,6 @@
 [package]
 name = "gxf2bed"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["alejandrogzi <alejandrxgzi@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -23,7 +23,7 @@ simple_logger = "5.0.0"
 indoc = "2.0"
 colored = "3.0.0"
 hashbrown = {version=">0.12", features=["rayon"]}
-genepred = {version="0.0.6", features=["rayon", "mmap", "gzip", "zstd", "bz2"]}
+genepred = {version="0.0.8", features=["rayon", "mmap", "gzip", "zstd", "bz2"]}
 tempfile = "3.23.0"
 
 [dev-dependencies]

@@ -247,9 +247,9 @@ checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
 name = "genepred"
-version = "0.0.6"
+version = "0.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3aea8d90e78c5dbf05ee3b092ae5a997e8a0bd6164193c947ecda1f9dfeb8053"
+checksum = "67f16b1434d6489d0fcd536e5e1d178f5224e325880138f25b270f305ef95d5d"
 dependencies = [
  "bzip2",
  "flate2",
