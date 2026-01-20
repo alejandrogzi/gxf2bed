@@ -59,8 +59,9 @@ chr27 17266469 17281218 ENST00000541931.8 1000 + 17266469 17281218 0,0,200 2 103
 ```
 
 
-> What's new on v.0.3.1
+> What's new on v.0.3.2
 >
+> - Updates imports
 > - Fixes an import typo in main.rs
 > - Converts GTF and GFF3 files to BED format
 > - Supports multiple BED formats (BED3, BED4, BED5, BED6, BED9, BED12)
