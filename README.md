@@ -114,10 +114,15 @@ to build the development container image:
 2. initialize docker with `start docker` or `systemctl start docker`
 3. build the image `docker image build --tag gxf2bed .`
 4. run `docker run --rm -v "[dir_where_your_gtf_is]:/dir" gxf2bed -i /dir/<GTF/GFF> -o /dir/<BED>`
+to pull the image from dockerhub: 
+1. run `docker pull ghcr.io/alejandrogzi/gxf2bed:latest`
 
 ## Conda
 to use gxf2bed through Conda just:
 1. `conda install gxf2bed -c bioconda` or `conda create -n gxf2bed -c bioconda gxf2bed`
+
+## Nextflow
+to use gxf2bed through Nextflow you can borrow the provided module from the [assets/nf/gxf2bed](https://github.com/alejandrogzi/gxf2bed/tree/main/assets/nf/gxf2bed) folder.
 
 ## Benchmark + FAQ
 > [!WARNING]

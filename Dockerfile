@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM rust:1.74.0-bullseye AS builder
+FROM rust:1.93.0-bullseye AS builder
 
 COPY .git /app/.git
 COPY Cargo.lock Cargo.toml /app/
@@ -10,6 +10,6 @@ RUN cargo build --release --manifest-path /app/Cargo.toml
 
 FROM debian:bullseye
 
-COPY --from=builder /app/target/release/gxt2bed /usr/local/bin/
+COPY --from=builder /app/target/release/gxf2bed /usr/local/bin/
 
-ENTRYPOINT ["/usr/local/bin/gxt2bed"]
+RUN gxf2bed --help
