@@ -247,9 +247,9 @@ checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
 name = "genepred"
-version = "0.0.8"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67f16b1434d6489d0fcd536e5e1d178f5224e325880138f25b270f305ef95d5d"
+checksum = "92a22af29dadef6aec66b43a3b1a601030feaab36ec31a541d0347889fbc56a0"
 dependencies = [
  "bzip2",
  "flate2",
@@ -273,7 +273,7 @@ dependencies = [
 
 [[package]]
 name = "gxf2bed"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "clap",
  "colored",
